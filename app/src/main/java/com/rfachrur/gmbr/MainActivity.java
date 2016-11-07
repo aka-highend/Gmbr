@@ -32,7 +32,7 @@ import java.io.OutputStream;
 
 public class MainActivity extends Activity {
 
-    private CustomView drawView;
+    private CustomView customView;
     private ImageButton currPaint;
     private String comment;
     //these three values are used to define the brush size
@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        drawView = (CustomView) findViewById(R.id.drawing);
+        customView = (CustomView) findViewById(R.id.drawing);
         LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paint_colors);
         currPaint = (ImageButton)paintLayout.getChildAt(0);
         currPaint.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
 
                         comment = userInput.getText().toString();
-                        drawView.setComment(comment);
+                        customView.setComment(comment);
                         //Toast.makeText(getApplicationContext(), comment, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -143,7 +143,7 @@ public class MainActivity extends Activity {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    drawView.setImageBitmap(photo);
+                    customView.setImageBitmap(photo);
                 }
             }, 1000);
             //drawView.setImageBitmap(photo);
@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
 
-                drawView.setImageBitmap(bitmap);
+                customView.setImageBitmap(bitmap);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -176,7 +176,7 @@ public class MainActivity extends Activity {
                     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     public void onClick(DialogInterface dialog, int which) {
                         //save drawing
-                        drawView.setDrawingCacheEnabled(true);
+                        customView.setDrawingCacheEnabled(true);
  /*                      String imgSaved = MediaStore.Images.Media.insertImage(
                                 getContentResolver(), drawView.getDrawingCache(),
                                 UUID.randomUUID().toString() + ".png", "drawing");
@@ -196,7 +196,7 @@ public class MainActivity extends Activity {
 
                         Uri url = null;
                         String stringUrl = null;    /* value to be returned */
-                        Bitmap bmp = drawView.getDrawingCache();
+                        Bitmap bmp = customView.getDrawingCache();
                         ContentResolver cr = getContentResolver();
                         try {
                             url =cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
@@ -224,7 +224,7 @@ public class MainActivity extends Activity {
                             }
                         }
 
-                        drawView.destroyDrawingCache();
+                        customView.destroyDrawingCache();
                     }
                 });
                 saveDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -295,7 +295,7 @@ public class MainActivity extends Activity {
                 newDialog.setMessage("Start new drawing (you will lose the current drawing)?");
                 newDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int which){
-                        drawView.startNew();
+                        customView.startNew();
                         dialog.dismiss();
                     }
                 });
@@ -327,8 +327,8 @@ public class MainActivity extends Activity {
                 smallBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        drawView.setErase(true);
-                        drawView.setBrushSize(smallBrush);
+                        customView.setErase(true);
+                        customView.setBrushSize(smallBrush);
                         brushDialog.dismiss();
                     }
                 });
@@ -337,8 +337,8 @@ public class MainActivity extends Activity {
                 mediumBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        drawView.setErase(true);
-                        drawView.setBrushSize(mediumBrush);
+                        customView.setErase(true);
+                        customView.setBrushSize(mediumBrush);
                         brushDialog.dismiss();
                     }
                 });
@@ -347,8 +347,8 @@ public class MainActivity extends Activity {
                 largeBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        drawView.setErase(true);
-                        drawView.setBrushSize(largeBrush);
+                        customView.setErase(true);
+                        customView.setBrushSize(largeBrush);
                         brushDialog.dismiss();
                     }
                 });
@@ -372,8 +372,8 @@ public class MainActivity extends Activity {
                 smallBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        drawView.setBrushSize(smallBrush);
-                        drawView.setLastBrushSize(smallBrush);
+                        customView.setBrushSize(smallBrush);
+                        customView.setLastBrushSize(smallBrush);
                         brushDialog.dismiss();
                     }
                 });
@@ -382,8 +382,8 @@ public class MainActivity extends Activity {
                 mediumBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        drawView.setBrushSize(mediumBrush);
-                        drawView.setLastBrushSize(mediumBrush);
+                        customView.setBrushSize(mediumBrush);
+                        customView.setLastBrushSize(mediumBrush);
                         brushDialog.dismiss();
                     }
                 });
@@ -392,13 +392,13 @@ public class MainActivity extends Activity {
                 largeBtn.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-                        drawView.setBrushSize(largeBrush);
-                        drawView.setLastBrushSize(largeBrush);
+                        customView.setBrushSize(largeBrush);
+                        customView.setLastBrushSize(largeBrush);
                         brushDialog.dismiss();
                     }
                 });
 
-                drawView.setErase(false);
+                customView.setErase(false);
             }
         });
     }
@@ -409,14 +409,14 @@ public class MainActivity extends Activity {
             ImageButton imgView = (ImageButton)view;
             String color = view.getTag().toString();
 
-            drawView.setColor(color);
+            customView.setColor(color);
 
             imgView.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
             currPaint.setImageDrawable(getResources().getDrawable(R.drawable.paint));
             currPaint=(ImageButton)view;
 
-            drawView.setErase(false);
-            drawView.setBrushSize(drawView.getLastBrushSize());
+            customView.setErase(false);
+            customView.setBrushSize(customView.getLastBrushSize());
         }
 
 
