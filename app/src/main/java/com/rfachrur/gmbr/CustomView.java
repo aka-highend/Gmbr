@@ -34,20 +34,9 @@ public class CustomView extends View {
     //defines how to draw
     private Paint drawPaint;
 
-    //initial color
-    private int paintColor = 0xFF660000;
-
-    private Paint _paintBlur;
-
-    //flag to set erase mode
-    private boolean eraseMode = false;
-
     //canvas - holding pen, holds your drawings
     //and transfers them to the view
     private Canvas drawCanvas;
-
-    //canvas bitmap
-    private Bitmap canvasBitmap;
 
     //brush size
     private float currentBrushSize, lastBrushSize;
@@ -63,6 +52,7 @@ public class CustomView extends View {
 
         drawPath = new Path();
         drawPaint = new Paint();
+        int paintColor = 0xFF660000;
         drawPaint.setColor(paintColor);
         drawPaint.setAntiAlias(true);
         drawPaint.setStrokeWidth(currentBrushSize);
@@ -72,16 +62,16 @@ public class CustomView extends View {
 
         canvasPaint = new Paint(Paint.DITHER_FLAG);
 
-        this._paintBlur = new Paint();
-        this._paintBlur.set(drawPaint);
-        this._paintBlur.setAntiAlias(true);
-        this._paintBlur.setDither(true);
-        this._paintBlur.setStyle(Paint.Style.STROKE);
-        this._paintBlur.setStrokeJoin(Paint.Join.ROUND);
-        this._paintBlur.setStrokeCap(Paint.Cap.ROUND);
-        this._paintBlur.setColor(Color.RED);
-        this._paintBlur.setStrokeWidth(6);
-        this._paintBlur.setMaskFilter(new BlurMaskFilter(10.0F, BlurMaskFilter.Blur.OUTER));
+        Paint _paintBlur = new Paint();
+        _paintBlur.set(drawPaint);
+        _paintBlur.setAntiAlias(true);
+        _paintBlur.setDither(true);
+        _paintBlur.setStyle(Paint.Style.STROKE);
+        _paintBlur.setStrokeJoin(Paint.Join.ROUND);
+        _paintBlur.setStrokeCap(Paint.Cap.ROUND);
+        _paintBlur.setColor(Color.RED);
+        _paintBlur.setStrokeWidth(6);
+        _paintBlur.setMaskFilter(new BlurMaskFilter(10.0F, BlurMaskFilter.Blur.OUTER));
 
     }
 
@@ -105,7 +95,7 @@ public class CustomView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
 
         //create Bitmap of certain w,h
-        canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 
         //apply bitmap to graphic to start drawing.
         drawCanvas = new Canvas(canvasBitmap);
@@ -137,9 +127,8 @@ public class CustomView extends View {
 
     /** Set erase true or false */
     public void setErase(boolean isErase){
-        eraseMode = isErase;
 
-        if(eraseMode){
+        if(isErase){
             drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         } else {
             drawPaint.setXfermode(null);
@@ -202,9 +191,8 @@ public class CustomView extends View {
 
     //method to set brush size
     public void setBrushSize(float newSize) {
-        float pixelAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+        currentBrushSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 newSize, getResources().getDisplayMetrics());
-        currentBrushSize = pixelAmount;
         canvasPaint.setStrokeWidth(newSize);
     }
 

@@ -27,8 +27,6 @@ import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Toolbar mToolbar_top;
-    private Toolbar mToolbar_bottom;
     private static final String LOG_CAT = MainActivity.class.getSimpleName();
 
 
@@ -41,10 +39,10 @@ public class MainActivity extends AppCompatActivity {
 
         mCustomView = (CustomView)findViewById(R.id.custom_view);
 
-        mToolbar_top = (Toolbar) findViewById(R.id.toolbar_top);
+        Toolbar mToolbar_top = (Toolbar) findViewById(R.id.toolbar_top);
         setSupportActionBar(mToolbar_top);
 
-        mToolbar_bottom = (Toolbar)findViewById(R.id.toolbar_bottom);
+        Toolbar mToolbar_bottom = (Toolbar) findViewById(R.id.toolbar_bottom);
         mToolbar_bottom.setOverflowIcon(ContextCompat.getDrawable(this, R.drawable.ic_dots_vertical_white_24dp));
 
         mToolbar_bottom.inflateMenu(R.menu.menu_drawing);
@@ -206,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
                 .compress(Bitmap.CompressFormat.JPEG, 85, fOut);
 
         try {
+            assert fOut != null;
             fOut.flush();
             fOut.close();
         } catch (IOException e) {

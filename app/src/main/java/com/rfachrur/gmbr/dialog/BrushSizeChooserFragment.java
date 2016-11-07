@@ -23,8 +23,7 @@ public class BrushSizeChooserFragment extends DialogFragment {
 
     private float selectedBrushSize;
     private OnNewBrushSizeSelectedListener mListener;
-    private SeekBar brushSizeSeekBar;
-    private TextView minValue, maxValue, currentValue;
+    private TextView currentValue;
     private int currentBrushSize ;
 
     /**
@@ -72,11 +71,11 @@ public class BrushSizeChooserFragment extends DialogFragment {
         final View dialogView = inflater.inflate(R.layout.dialog_brush_size_chooser, null);
         if (dialogView != null) {
             //set the starting value of the seek bar for visual aide
-            minValue = (TextView)dialogView.findViewById(R.id.text_view_min_value);
+            TextView minValue = (TextView) dialogView.findViewById(R.id.text_view_min_value);
             int minSize = getResources().getInteger(R.integer.min_size);
             minValue.setText(minSize + "");
 
-            maxValue = (TextView)dialogView.findViewById(R.id.text_view_max_value);
+            TextView maxValue = (TextView) dialogView.findViewById(R.id.text_view_max_value);
             maxValue.setText(String.valueOf(getResources().getInteger(R.integer.max_size)));
 
 
@@ -85,7 +84,7 @@ public class BrushSizeChooserFragment extends DialogFragment {
                 currentValue.setText(getResources().getString(R.string.label_brush_size) + currentBrushSize);
             }
 
-            brushSizeSeekBar = (SeekBar)dialogView.findViewById(R.id.seek_bar_brush_size);
+            SeekBar brushSizeSeekBar = (SeekBar) dialogView.findViewById(R.id.seek_bar_brush_size);
             brushSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 int progressChanged = 0;
 
