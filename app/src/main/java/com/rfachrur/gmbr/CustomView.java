@@ -2,9 +2,9 @@ package com.rfachrur.gmbr;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -14,7 +14,6 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
 
 /**
  * Created by rfachrur on 11/6/16.
@@ -23,82 +22,139 @@ import java.util.ArrayList;
 
 public class CustomView extends View {
 
-    private static final String LOG_CAT = CustomView.class.getSimpleName();
-
     //drawing path
     private Path drawPath;
-
-    //defines what to draw
-    private Paint canvasPaint;
-
-    //defines how to draw
-    private Paint drawPaint;
-
-    //canvas - holding pen, holds your drawings
-    //and transfers them to the view
+    //drawing and canvas paint
+    private Paint drawPaint, canvasPaint;
+    //initial color
+    private int paintColor = 0xFF660000;
+    //canvas
     private Canvas drawCanvas;
+    //canvas bitmap
+    private Bitmap canvasBitmap;
 
-    //brush size
-    private float currentBrushSize, lastBrushSize;
+    private float brushSize, lastBrushSize;
 
-    private ArrayList<Path> paths = new ArrayList<Path>();
-    private ArrayList<Path> undonePaths = new ArrayList<Path>();
-    private float mX, mY;
-    private static final float TOUCH_TOLERANCE = 4;
+    private  boolean erase = false;
 
-    private void init(){
-        currentBrushSize = getResources().getInteger(R.integer.medium_size);
-        lastBrushSize = currentBrushSize;
+    private  int width, height;
 
+    //comment to attached on the image
+    private  String comment;
+
+    public CustomView(Context context, AttributeSet attrs ){
+        super(context, attrs);
+        setupDrawing();
+    }
+
+    private void setupDrawing(){
+        //get drawing area setup for interaction
         drawPath = new Path();
         drawPaint = new Paint();
-        int paintColor = 0xFF660000;
+
+        brushSize = getResources().getInteger(R.integer.medium_size);
+        lastBrushSize = brushSize;
+
+        //initialize drawPaint
         drawPaint.setColor(paintColor);
+
+        //initialize drawPath
         drawPaint.setAntiAlias(true);
-        drawPaint.setStrokeWidth(currentBrushSize);
+        drawPaint.setStrokeWidth(brushSize);
         drawPaint.setStyle(Paint.Style.STROKE);
         drawPaint.setStrokeJoin(Paint.Join.ROUND);
         drawPaint.setStrokeCap(Paint.Cap.ROUND);
 
         canvasPaint = new Paint(Paint.DITHER_FLAG);
 
-        Paint _paintBlur = new Paint();
-        _paintBlur.set(drawPaint);
-        _paintBlur.setAntiAlias(true);
-        _paintBlur.setDither(true);
-        _paintBlur.setStyle(Paint.Style.STROKE);
-        _paintBlur.setStrokeJoin(Paint.Join.ROUND);
-        _paintBlur.setStrokeCap(Paint.Cap.ROUND);
-        _paintBlur.setColor(Color.RED);
-        _paintBlur.setStrokeWidth(6);
-        _paintBlur.setMaskFilter(new BlurMaskFilter(10.0F, BlurMaskFilter.Blur.OUTER));
-
+        //drawCanvas.drawText("test", 20, 20, null);
     }
 
+    public void setImageBitmap(Bitmap bmp){
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
 
-    public CustomView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        /*
+        * */
+        int bmp_width = bmp.getWidth();
+        int bmp_height = bmp.getHeight();
+        float scaleWidth = ((float) width) / bmp_width;
+        float scaleHeight = ((float) height) / bmp_height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bmp, 0, 0, bmp_width, bmp_height, matrix, false);
+        //
+
+        drawCanvas.drawBitmap(resizedBitmap, 0, 0, paint);
+        invalidate();
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        for (Path p : paths) {
-            canvas.drawPath(p, drawPaint);
+    public void startNew(){
+        drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        invalidate();
+    }
+
+    public void setComment(String commentText){
+        this.comment = commentText;
+    }
+
+    public void setErase(boolean isErase){
+        //set erase true or false
+        erase=isErase;
+        if(erase){
+            drawPaint.setAlpha(0xFF);
+            drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+
         }
-        canvas.drawPath(drawPath, drawPaint);
+        else {
+            drawPaint.setXfermode(null);
+
+        }
+    }
+
+    public void setBrushSize(float newSize){
+        //update size
+
+        float pixelAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                newSize, getResources().getDisplayMetrics());
+
+        brushSize=pixelAmount;
+
+        drawPaint.setStrokeWidth(brushSize);
+    }
+
+    public void setLastBrushSize(float lastSize){
+        lastBrushSize=lastSize;
+    }
+    public float getLastBrushSize(){
+        return lastBrushSize;
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        //create canvas of certain device size.
         super.onSizeChanged(w, h, oldw, oldh);
 
-        //create Bitmap of certain w,h
-        Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        width = w;
+        height = h;
 
-        //apply bitmap to graphic to start drawing.
+        canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         drawCanvas = new Canvas(canvasBitmap);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
+        canvas.drawPath(drawPath, drawPaint);
     }
 
     @Override
@@ -106,102 +162,45 @@ public class CustomView extends View {
         float touchX = event.getX();
         float touchY = event.getY();
 
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touch_start(touchX, touchY);
-                invalidate();
+                if(comment != "" && comment != null ){
+                    canvasPaint.setTextSize(60);
+                    canvasPaint.setColor(paintColor);
+                    drawCanvas.drawText(comment, touchX, touchY, canvasPaint);
+                    comment = "";
+                    return true;
+                }
+                else {
+                    drawPath.moveTo(touchX, touchY);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                touch_move(touchX, touchY);
-                invalidate();
+                drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
-                touch_up();
-                invalidate();
+                drawCanvas.drawPath(drawPath, drawPaint);
+                drawPath.reset();
                 break;
             default:
                 return false;
         }
+
+        invalidate();
         return true;
     }
 
-    /** Set erase true or false */
-    public void setErase(boolean isErase){
-
-        if(isErase){
-            drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        } else {
-            drawPaint.setXfermode(null);
-        }
-    }
-
-    /** Start new Drawing */
-    public void eraseAll() {
-        drawPath = new Path();
-        paths.clear();
-        drawCanvas.drawColor(Color.WHITE);
+    public void setColor(String newColor){
+        //set color
         invalidate();
+
+        paintColor = Color.parseColor(newColor);
+        drawPaint.setColor(paintColor);
     }
 
-
-    private void touch_start(float x, float y) {
-        undonePaths.clear();
-        drawPath.reset();
-        drawPath.moveTo(x, y);
-        mX = x;
-        mY = y;
-    }
-
-    private void touch_up() {
-        drawPath.lineTo(mX, mY);
-        drawCanvas.drawPath(drawPath, drawPaint);
-        paths.add(drawPath);
-        drawPath = new Path();
-
-    }
-
-    private void touch_move(float x, float y) {
-        float dx = Math.abs(x - mX);
-        float dy = Math.abs(y - mY);
-        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            drawPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
-            mX = x;
-            mY = y;
-        }
-    }
-
-
-    public void onClickUndo () {
-        if (paths.size()>0)
-        {
-            undonePaths.add(paths.remove(paths.size()-1));
-            invalidate();
-        }
-
-    }
-
-    public void onClickRedo (){
-        if (undonePaths.size()>0)
-        {
-            paths.add(undonePaths.remove(undonePaths.size()-1));
-            invalidate();
-        }
-
-    }
-
-    //method to set brush size
-    public void setBrushSize(float newSize) {
-        currentBrushSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                newSize, getResources().getDisplayMetrics());
-        canvasPaint.setStrokeWidth(newSize);
-    }
-
-    public void setLastBrushSize(float lastSize){
-        lastBrushSize=lastSize;
-    }
-
-    public float getLastBrushSize(){
-        return lastBrushSize;
+    public void setColor(int newColor){
+        invalidate();
+        drawPaint.setColor(newColor);
     }
 
 }
