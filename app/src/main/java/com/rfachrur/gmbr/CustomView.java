@@ -9,10 +9,13 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.util.Objects;
 
 
 /**
@@ -34,8 +37,6 @@ public class CustomView extends View {
     private Bitmap canvasBitmap;
 
     private float brushSize, lastBrushSize;
-
-    private  boolean erase = false;
 
     private  int width, height;
 
@@ -107,8 +108,7 @@ public class CustomView extends View {
 
     public void setErase(boolean isErase){
         //set erase true or false
-        erase=isErase;
-        if(erase){
+        if(isErase){
             drawPaint.setAlpha(0xFF);
             drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
@@ -123,10 +123,8 @@ public class CustomView extends View {
     public void setBrushSize(float newSize){
         //update size
 
-        float pixelAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+        brushSize= TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 newSize, getResources().getDisplayMetrics());
-
-        brushSize=pixelAmount;
 
         drawPaint.setStrokeWidth(brushSize);
     }
@@ -164,15 +162,17 @@ public class CustomView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if(comment != "" && comment != null ){
-                    canvasPaint.setTextSize(60);
-                    canvasPaint.setColor(paintColor);
-                    drawCanvas.drawText(comment, touchX, touchY, canvasPaint);
-                    comment = "";
-                    return true;
-                }
-                else {
-                    drawPath.moveTo(touchX, touchY);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    if(!Objects.equals(comment, "") && comment != null ){
+                        canvasPaint.setTextSize(60);
+                        canvasPaint.setColor(paintColor);
+                        drawCanvas.drawText(comment, touchX, touchY, canvasPaint);
+                        comment = "";
+                        return true;
+                    }
+                    else {
+                        drawPath.moveTo(touchX, touchY);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_MOVE:

@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,8 +33,7 @@ import java.io.OutputStream;
 public class MainActivity extends Activity {
 
     private CustomView drawView;
-    private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, takingPhoto_btn, addCommentBtn;
-    private Button selectImgBtn;
+    private ImageButton currPaint;
     private String comment;
     //these three values are used to define the brush size
     private int smallBrush, mediumBrush, largeBrush;
@@ -66,7 +67,7 @@ public class MainActivity extends Activity {
     }
 
     private void subscribeSelectImageButtonClickEvent(){
-        selectImgBtn = (Button)findViewById(R.id.select_img);
+        Button selectImgBtn = (Button) findViewById(R.id.select_img);
 
         selectImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +84,7 @@ public class MainActivity extends Activity {
     }
 
     private void subscribeAddCommentButtonClickEvent(){
-        addCommentBtn = (ImageButton)findViewById(R.id.text_btn);
+        ImageButton addCommentBtn = (ImageButton) findViewById(R.id.text_btn);
 
         addCommentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,7 +118,7 @@ public class MainActivity extends Activity {
     }
 
     private void subscribeTakingPhotoButtonClickEvent() {
-        takingPhoto_btn = (ImageButton) findViewById(R.id.takingPhoto_btn);
+        ImageButton takingPhoto_btn = (ImageButton) findViewById(R.id.takingPhoto_btn);
 
         takingPhoto_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,7 +164,7 @@ public class MainActivity extends Activity {
     }
 
     private void subscribeSaveButtonClickEvent(){
-        saveBtn = (ImageButton)findViewById(R.id.save_btn);
+        ImageButton saveBtn = (ImageButton) findViewById(R.id.save_btn);
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,6 +173,7 @@ public class MainActivity extends Activity {
                 saveDialog.setTitle("Save drawing");
                 saveDialog.setMessage("Save drawing to device Gallery?");
                 saveDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     public void onClick(DialogInterface dialog, int which) {
                         //save drawing
                         drawView.setDrawingCacheEnabled(true);
@@ -200,11 +202,9 @@ public class MainActivity extends Activity {
                             url =cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
                             if (bmp != null) {
-                                OutputStream imageOut = cr.openOutputStream(url);
-                                try {
+                                assert url != null;
+                                try (OutputStream imageOut = cr.openOutputStream(url)) {
                                     bmp.compress(Bitmap.CompressFormat.JPEG, 50, imageOut);
-                                } finally {
-                                    imageOut.close();
                                 }
 
                                 long id = ContentUris.parseId(url);
@@ -213,6 +213,7 @@ public class MainActivity extends Activity {
                                 // This is for backward compatibility.
                                 storeThumbnail(cr, miniThumb, id, 50F, 50F, MediaStore.Images.Thumbnails.MICRO_KIND);
                             } else {
+                                assert url != null;
                                 cr.delete(url, null, null);
                                 url = null;
                             }
@@ -237,7 +238,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private static final Bitmap storeThumbnail(
+    private static Bitmap storeThumbnail(
             ContentResolver cr,
             Bitmap source,
             long id,
@@ -268,8 +269,10 @@ public class MainActivity extends Activity {
         Uri url = cr.insert(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, values);
 
         try {
+            assert url != null;
             OutputStream thumbOut = cr.openOutputStream(url);
             thumb.compress(Bitmap.CompressFormat.JPEG, 100, thumbOut);
+            assert thumbOut != null;
             thumbOut.close();
             return thumb;
         } catch (FileNotFoundException ex) {
@@ -281,7 +284,7 @@ public class MainActivity extends Activity {
 
 
     private void subscribeNewButtonClickEvent(){
-        newBtn = (ImageButton)findViewById(R.id.new_btn);
+        ImageButton newBtn = (ImageButton) findViewById(R.id.new_btn);
 
         newBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -309,7 +312,7 @@ public class MainActivity extends Activity {
 
 
     private void subscribeEraseButtonClickEvent(){
-        eraseBtn = (ImageButton)findViewById(R.id.erase_btn);
+        ImageButton eraseBtn = (ImageButton) findViewById(R.id.erase_btn);
 
         eraseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -354,7 +357,7 @@ public class MainActivity extends Activity {
     }
 
     private void subscribeDrawButtonClickEvent(){
-        drawBtn = (ImageButton)findViewById(R.id.draw_btn);
+        ImageButton drawBtn = (ImageButton) findViewById(R.id.draw_btn);
 
         drawBtn.setOnClickListener(new View.OnClickListener(){
             @Override
