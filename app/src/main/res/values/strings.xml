@@ -14,4 +14,7 @@
     <string name="med">Medium</string>
     <string name="lrg">Large</string>
     <string name="after_click_ok_touch_the_image_to_place_the_text">After click OK, touch the image to place the text</string>
+    <string name="photo">Photo</string>
+    <string name="text">text</string>
+    <string name="add_image">Add Image</string>
 </resources>
